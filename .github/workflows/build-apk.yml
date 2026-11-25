@@ -18,10 +18,10 @@ jobs:
           java-version: '17'
 
       - name: Set up Android SDK
-      
         uses: android-actions/setup-android@v3
-            with:
-        accept-sdk-licenses: true
+        with:
+          accept-sdk-licenses: true
+
       - name: Find and extract project
         run: |
           mkdir project
@@ -43,4 +43,3 @@ jobs:
           name: KolonkaControl-APK
           path: project/**/build/outputs/apk/debug/*.apk
           if-no-files-found: error
- 
