@@ -18,10 +18,10 @@ jobs:
           java-version: '17'
 
       - name: Set up Android SDK
-      with:
-       accept-sdk-licenses: true
+      
         uses: android-actions/setup-android@v3
-
+       with:
+       accept-sdk-licenses: true
       - name: Find and extract project
         run: |
           mkdir project
