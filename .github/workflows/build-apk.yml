@@ -18,28 +18,33 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Install Android SDK
-        run: |
-          yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
 
-      - name: Find and extract project
+      - name: Extract project
         run: |
-          mkdir project
-          unzip -q *.zip -d project
-          find project -name gradlew -type f -exec chmod +x {} \;
+          mkdir -p project
+          ZIP_FILE=$(find . -maxdepth 1 -name '*.zip' | head -n 1)
+          if [ -z "$ZIP_FILE" ]; then
+            echo "ZIP archive not found"
+            exit 1
+          fi
+          unzip -q "$ZIP_FILE" -d project
+
+      - name: Find Gradle wrapper
+        run: |
+          GRADLEW=$(find project -name gradlew -type f | head -n 1)
+          if [ -z "$GRADLEW" ]; then
+            echo "Gradle wrapper not found in ZIP"
+            exit 1
+          fi
+          chmod +x "$GRADLEW"
+          echo "GRADLEW=$GRADLEW" >> "$GITHUB_ENV"
 
       - name: Build debug APK
         run: |
-          cd project
-          GRADLEW=$(find . -name gradlew -type f | head -n 1)
-          if [ -n "$GRADLEW" ]; then
-            cd "$(dirname "$GRADLEW")"
-            ./gradlew assembleDebug
-          else
-            echo "Gradle wrapper not found"
-            exit 1
-          fi
+          cd "$(dirname "$GRADLEW")"
+          ./gradlew --no-daemon assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
